@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naturaligners — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{--green:#1D9E75;--green-light:#E1F5EE;--green-dark:#085041;--blue:#378ADD;--blue-light:#E6F1FB;--purple:#7F77DD;--purple-light:#EEEDFE;--orange:#EF9F27;--orange-light:#FAEEDA;--coral:#D85A30;--coral-light:#FAECE7;--olive:#639922;--olive-light:#EAF3DE;--olive-dark:#27500A;--red:#c0392b;--red-light:#fdecea;--bg:#ffffff;--bg2:#f5f5f3;--bg3:#ebebea;--text:#1a1a18;--text2:#6b6b68;--border:rgba(0,0,0,0.12);--radius:8px;--radius-lg:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f7f7f5;color:var(--text);min-height:100vh;}
+.container{max-width:1500px;margin:0 auto;padding:1.5rem;}
+.loader{position:fixed;inset:0;background:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;}
+.loader.hide{display:none;}
+.spinner{width:36px;height:36px;border:3px solid var(--green-light);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-text{font-size:13px;color:var(--text2);}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:46px;height:46px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0;}
+.logo-name{font-size:18px;font-weight:600;color:var(--text);}
+.logo-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.pill{font-size:12px;padding:4px 12px;border-radius:20px;background:var(--green-light);color:var(--green-dark);}
+.btn-add{font-size:13px;display:flex;align-items:center;gap:6px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:8px 16px;cursor:pointer;font-weight:500;}
+.btn-add:hover{background:#188a64;}
+.btn-refresh{font-size:12px;display:flex;align-items:center;gap:5px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 12px;cursor:pointer;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;}
+.mc{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;}
+.mc-lbl{font-size:12px;color:var(--text2);margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.mc-val{font-size:24px;font-weight:600;color:var(--text);line-height:1;}
+.mc-sub{font-size:11px;margin-top:4px;}
+.ok{color:var(--green);}
+.board-scroll{overflow-x:auto;padding-bottom:10px;}
+.board{display:flex;gap:10px;min-width:max-content;align-items:flex-start;}
+.col{width:162px;flex-shrink:0;}
+.col-head{margin-bottom:8px;}
+.col-title{font-size:11px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;}
+.col-bar{height:3px;border-radius:20px;margin-bottom:6px;}
+.col-owner{font-size:10px;color:var(--text2);background:var(--bg2);border-radius:20px;padding:2px 8px;width:fit-content;}
+.col-count{font-size:10px;background:var(--bg3);border-radius:20px;padding:1px 7px;color:var(--text2);}
+.arrow-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:56px;width:28px;flex-shrink:0;}
+.arrow-box{background:var(--bg2);border-radius:var(--radius);padding:7px 5px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.arrow-box i{font-size:14px;color:var(--text2);}
+.arrow-label{font-size:9px;color:var(--text2);writing-mode:vertical-rl;transform:rotate(180deg);}
+.chip{background:var(--bg2);border-radius:var(--radius);padding:9px 10px;margin-bottom:6px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;}
+.chip:hover{border-color:rgba(0,0,0,0.2);background:#efefed;}
+.chip.sel{border-color:var(--green);background:var(--green-light);}
+.chip-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.chip-info{font-size:10px;color:var(--text2);margin-top:4px;}
+.badge-stage{font-size:10px;border-radius:20px;padding:2px 8px;display:inline-block;font-weight:500;}
+.bp-1{background:var(--blue-light);color:#0C447C;}
+.bp-2{background:var(--purple-light);color:#3C3489;}
+.bp-3{background:var(--orange-light);color:#633806;}
+.bp-4{background:var(--coral-light);color:#712B13;}
+.bp-5{background:var(--green-light);color:var(--green-dark);}
+.bp-7{background:var(--olive-light);color:var(--olive-dark);}
+.bp-8{background:var(--olive-light);color:#173404;}
+.chip-dots{display:flex;gap:4px;margin-top:7px;}
+.cd{width:21px;height:21px;border-radius:50%;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cd-done{background:var(--green);color:#fff;border:1.5px solid var(--green);}
+.cd-next{background:#fff;color:var(--green);border:1.5px solid var(--green);}
+.cd-pend{background:#fff;color:#bbb;border:1.5px solid #ddd;}
+
+/* MODAL NUEVO PACIENTE */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:var(--radius-lg);padding:1.5rem;width:420px;max-width:95vw;}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px;display:block;}
+.form-input,.form-select{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);color:var(--text);background:#fff;}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--green);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-save{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:10px;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px;}
+.btn-save:disabled{background:#ccc;cursor:not-allowed;}
+
+/* MODAL CONFIRMAR ELIMINAR */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;}
+.confirm-overlay.show{display:flex;}
+.confirm-box{background:#fff;border-radius:var(--radius-lg);padding:1.5rem;width:360px;max-width:95vw;text-align:center;}
+.confirm-icon{font-size:40px;margin-bottom:12px;}
+.confirm-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.confirm-msg{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+.confirm-btns{display:flex;gap:10px;}
+.btn-cancel{flex:1;padding:10px;border:1px solid var(--border);background:#fff;border-radius:var(--radius);font-size:13px;cursor:pointer;font-weight:500;color:var(--text);}
+.btn-cancel:hover{background:var(--bg2);}
+.btn-delete{flex:1;padding:10px;border:none;background:var(--red);color:#fff;border-radius:var(--radius);font-size:13px;cursor:pointer;font-weight:500;}
+.btn-delete:hover{background:#a93226;}
+.btn-delete:disabled{background:#ccc;cursor:not-allowed;}
+
+/* DETAIL */
+.detail-panel{margin-top:1.25rem;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;display:none;}
+.detail-panel.show{display:block;}
+.dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.dp-left{display:flex;align-items:center;gap:12px;}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--green-dark);flex-shrink:0;}
+.dp-name{font-size:16px;font-weight:600;color:var(--text);}
+.dp-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.dp-close{font-size:20px;color:var(--text2);cursor:pointer;background:none;border:none;}
+.dp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.dp-box{background:var(--bg2);border-radius:var(--radius);padding:12px 14px;}
+.dp-box-label{font-size:10px;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;font-weight:500;}
+.dp-box-val{font-size:14px;font-weight:600;color:var(--text);}
+.dp-box-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+.dp-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.dp-field .lbl{font-size:11px;color:var(--text2);margin-bottom:3px;}
+.dp-field .val{font-size:13px;font-weight:500;color:var(--text);}
+.etapa-selector{margin-bottom:14px;}
+.etapa-label{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;}
+.etapa-select{font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);width:100%;background:#fff;color:var(--text);}
+.etapa-select:focus{outline:none;border-color:var(--green);}
+.btn-save-etapa{font-size:12px;padding:6px 14px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;margin-top:6px;font-weight:500;}
+.btn-save-etapa:disabled{background:#ccc;cursor:not-allowed;}
+.save-msg{font-size:11px;color:var(--green);margin-left:8px;display:none;}
+
+/* ALINEADORES */
+.ali-section{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;}
+.ali-section-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ali-section-title{font-size:12px;font-weight:500;color:var(--text);}
+.ali-section-hint{font-size:11px;color:var(--text2);}
+.ali-dots-click{display:flex;gap:12px;}
+.ali-dot-btn{width:48px;height:48px;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #ddd;background:#fff;color:#bbb;transition:all 0.15s;flex-direction:column;gap:1px;}
+.ali-dot-btn:hover{transform:scale(1.1);border-color:#aaa;}
+.ali-dot-btn.done{background:var(--green);color:#fff;border-color:var(--green);}
+.ali-dot-btn.done:hover{background:#188a64;border-color:#188a64;}
+.ali-dot-num{font-size:14px;font-weight:700;line-height:1;}
+.ali-dot-lbl{font-size:8px;opacity:0.7;font-weight:400;}
+.ali-save-msg{font-size:11px;color:var(--green);margin-top:10px;display:none;font-weight:500;}
+
+/* GRADUADO BANNER */
+.grad-banner{background:var(--olive-light);border:1px solid var(--olive);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.grad-banner-left{display:flex;align-items:center;gap:10px;}
+.grad-icon{font-size:24px;}
+.grad-title{font-size:13px;font-weight:600;color:var(--olive-dark);}
+.grad-sub{font-size:11px;color:var(--olive-dark);opacity:0.8;margin-top:2px;}
+.btn-eliminar{font-size:12px;padding:7px 14px;background:var(--red);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-weight:500;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;}
+.btn-eliminar:hover{background:#a93226;}
+
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1a18;color:#fff;padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:300;display:none;}
+.toast.show{display:block;}
+.toast.error{background:var(--red);}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><div class="spinner"></div><div class="loader-text">Cargando pacientes desde Google Sheets...</div></div>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL NUEVO PACIENTE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title"><span>Nuevo paciente</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" id="f-nombre" type="text" placeholder="Ej: María García López"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Iniciales</label><input class="form-input" id="f-iniciales" type="text" placeholder="MG" maxlength="3"></div>
+      <div class="form-group"><label class="form-label">Fecha de inicio</label><input class="form-input" id="f-inicio" type="date"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Etapa inicial</label>
+      <select class="form-select" id="f-etapa">
+        <option value="1">1 · Escaneo — Doctores</option>
+        <option value="2">2 · Biomodelo — Téc. Nemotec</option>
+        <option value="3">3 · Impresión — Mikel</option>
+        <option value="4">4 · Elaboración — Mikel</option>
+        <option value="5">5–6 · Almacén — Cap. Possible</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><input class="form-input" id="f-notas" type="text" placeholder="Opcional"></div>
+    <button class="btn-save" id="btn-save-new" onclick="saveNewPatient()">Guardar en Google Sheets</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="confirm-overlay" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">¿Eliminar paciente?</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-delete" id="btn-confirm-delete" onclick="confirmDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">N</div>
+      <div><div class="logo-name">Naturaligners</div><div class="logo-sub">Laboratorio Digital · Gestión de pacientes</div></div>
+    </div>
+    <div class="topbar-right">
+      <span class="pill"><span id="fecha-hoy"></span></span>
+      <button class="btn-refresh" onclick="loadData()"><i class="ti ti-refresh"></i> Actualizar</button>
+      <button class="btn-add" onclick="openModal()"><i class="ti ti-plus"></i> Nuevo paciente</button>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="mc"><div class="mc-lbl"><i class="ti ti-users"></i>Pacientes activos</div><div class="mc-val" id="m-total">—</div><div class="mc-sub ok"></div></div>
+    <div class="mc"><div class="mc-lbl"><i class="ti ti-printer"></i>En producción</div><div class="mc-val" id="m-prod">—</div><div class="mc-sub" style="color:var(--text2);">etapas 1–4</div></div>
+    <div class="mc"><div class="mc-lbl"><i class="ti ti-package"></i>En almacén / entrega</div><div class="mc-val" id="m-store">—</div><div class="mc-sub ok"></div></div>
+    <div class="mc"><div class="mc-lbl"><i class="ti ti-award"></i>Tratamientos completos</div><div class="mc-val" id="m-done">—</div><div class="mc-sub" style="color:var(--text2);">graduados</div></div>
+  </div>
+
+  <div class="board-scroll"><div class="board" id="board"></div></div>
+
+  <div class="detail-panel" id="dp">
+    <div class="dp-header">
+      <div class="dp-left">
+        <div class="avatar" id="dp-av"></div>
+        <div><div class="dp-name" id="dp-name"></div><div class="dp-sub" id="dp-sub"></div></div>
+      </div>
+      <button class="dp-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="dp-two">
+      <div class="dp-box"><div class="dp-box-label">Etapa de producción</div><div class="dp-box-val" id="dp-etapa"></div><div class="dp-box-sub" id="dp-owner"></div></div>
+      <div class="dp-box"><div class="dp-box-label">Alineadores entregados</div><div class="dp-box-val" id="dp-ali-val"></div><div class="dp-box-sub" id="dp-ali-sub"></div></div>
+    </div>
+    <div class="dp-fields">
+      <div class="dp-field"><div class="lbl">Inicio</div><div class="val" id="dp-start"></div></div>
+      <div class="dp-field"><div class="lbl">Próx. entrega</div><div class="val" id="dp-next"></div></div>
+      <div class="dp-field"><div class="lbl">Notas</div><div class="val" id="dp-notas">—</div></div>
+    </div>
+
+    <!-- BANNER GRADUADO + ELIMINAR (solo etapa 8) -->
+    <div class="grad-banner" id="grad-banner" style="display:none;">
+      <div class="grad-banner-left">
+        <span class="grad-icon">🎓</span>
+        <div>
+          <div class="grad-title">Tratamiento completado</div>
+          <div class="grad-sub">Retenedor entregado · Paciente graduado</div>
+        </div>
+      </div>
+      <button class="btn-eliminar" onclick="askDelete()"><i class="ti ti-trash"></i>Eliminar paciente</button>
+    </div>
+
+    <div class="etapa-selector">
+      <div class="etapa-label">Cambiar etapa de producción</div>
+      <select class="etapa-select" id="dp-etapa-sel">
+        <option value="1|Escaneo|Doctores|scan">1 · Escaneo — Doctores</option>
+        <option value="2|Generación de biomodelo|Téc. Nemotec|nemo">2 · Biomodelo — Téc. Nemotec</option>
+        <option value="3|Impresión de modelos|Mikel|print">3 · Impresión — Mikel</option>
+        <option value="4|Elaboración de alineadores|Mikel|elab">4 · Elaboración — Mikel</option>
+        <option value="5|Almacén — entrega mensual|Cap. Possible|store">5–6 · Almacén — Cap. Possible</option>
+        <option value="7|Escaneo para retenedor|Doctores|ret-scan">7 · Escaneo retenedor</option>
+        <option value="8|Tratamiento completo|Cap. Possible|ret-done">8 · Tratamiento completo · Graduado</option>
+      </select>
+      <div style="display:flex;align-items:center;margin-top:6px;">
+        <button class="btn-save-etapa" id="btn-save-etapa" onclick="saveEtapa()">Guardar etapa</button>
+        <span class="save-msg" id="etapa-msg">✓ Guardado</span>
+      </div>
+    </div>
+
+    <div class="ali-section">
+      <div class="ali-section-top">
+        <span class="ali-section-title">Alineadores entregados</span>
+        <span class="ali-section-hint">Toca para marcar o desmarcar</span>
+      </div>
+      <div class="ali-dots-click" id="ali-dots-click"></div>
+      <div class="ali-save-msg" id="ali-save-msg">✓ Guardado en Google Sheets</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var API='https://script.google.com/macros/s/AKfycbxzeZCiPAOlD8-mi0iFtZIL4GHIdMrKDfkW1WjVr4IG8NJsKmo_MjvC8jH7lCRi2_rZ/exec';
+var colDefs=[
+  {num:1,title:'Escaneo',color:'#378ADD',owner:'Doctores',send:'Dra. Jacquelin'},
+  {num:2,title:'Biomodelo',color:'#7F77DD',owner:'Téc. Nemotec',send:'Téc. Nemotec'},
+  {num:3,title:'Impresión',color:'#EF9F27',owner:'Mikel',send:'Mikel'},
+  {num:4,title:'Elaboración',color:'#D85A30',owner:'Mikel',send:'Mikel'},
+  {num:5,title:'Almacén / Entrega',color:'#1D9E75',owner:'Cap. Possible',send:null},
+  {num:7,title:'Esc. Retenedor',color:'#639922',owner:'Doctores',send:null},
+  {num:8,title:'Graduados',color:'#27500A',owner:'Cap. Possible',send:null}
+];
+var allPatients=[],curPid=null,curAli=0,curNombre='';
+var meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+var hoy=new Date();
+document.getElementById('fecha-hoy').textContent=hoy.getDate()+' '+meses[hoy.getMonth()]+' '+hoy.getFullYear();
+document.getElementById('f-inicio').value=hoy.toISOString().split('T')[0];
+
+function showToast(msg,err){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(err?' error':'');setTimeout(function(){t.className='toast';},3000);}
+
+function jsonpGet(url,cb){
+  var id='cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+  window[id]=function(data){delete window[id];var s=document.getElementById(id);if(s)s.remove();cb(data);};
+  var s=document.createElement('script');s.id=id;
+  s.onerror=function(){cb(null);};
+  s.src=url+'&callback='+id+'&t='+Date.now();
+  document.head.appendChild(s);
+}
+
+function loadData(){
+  document.getElementById('loader').classList.remove('hide');
+  jsonpGet(API+'?x=1',function(data){
+    document.getElementById('loader').classList.add('hide');
+    if(!data){showToast('Error al cargar datos',true);return;}
+    allPatients=data;renderBoard(data);updateMetrics(data);
+  });
+}
+
+function updateMetrics(data){
+  document.getElementById('m-total').textContent=data.length;
+  document.getElementById('m-prod').textContent=data.filter(function(p){return parseInt(p.etapa_num)<=4;}).length;
+  document.getElementById('m-store').textContent=data.filter(function(p){return parseInt(p.etapa_num)==5;}).length;
+  document.getElementById('m-done').textContent=data.filter(function(p){return parseInt(p.etapa_num)==8;}).length;
+}
+
+function renderBoard(data){
+  var board=document.getElementById('board');board.innerHTML='';
+  colDefs.forEach(function(col,ci){
+    var patients=data.filter(function(p){return parseInt(p.etapa_num)===col.num;});
+    var colEl=document.createElement('div');colEl.className='col';
+    if(col.num===5)colEl.style.width='178px';
+    colEl.innerHTML='<div class="col-head"><div class="col-title">'+col.num+' · '+col.title+' <span class="col-count">'+patients.length+'</span></div><div class="col-bar" style="background:'+col.color+';"></div><div class="col-owner">'+col.owner+'</div></div>';
+    patients.forEach(function(p){
+      var chip=document.createElement('div');chip.className='chip';
+      var done=parseInt(p.ali_entregados)||0;
+      var dotsHtml='';
+      if(col.num===5){
+        dotsHtml='<div class="chip-dots">';
+        for(var i=1;i<=6;i++){var cls=i<=done?'cd-done':i===done+1?'cd-next':'cd-pend';dotsHtml+='<div class="cd '+cls+'">'+i+'</div>';}
+        dotsHtml+='</div>';
+      }
+      var gradBadge=col.num===8?' <span style="font-size:10px;">🎓</span>':'';
+      chip.innerHTML='<div class="chip-name">'+p.nombre+gradBadge+'</div><span class="badge-stage bp-'+col.num+'">'+col.title+'</span><div class="chip-info">Inicio: '+p.inicio+'</div>'+dotsHtml;
+      chip.onclick=(function(pat){return function(){selPatient(this,pat);};})(p);
+      colEl.appendChild(chip);
+    });
+    board.appendChild(colEl);
+    if(col.send&&ci<colDefs.length-1){var arr=document.createElement('div');arr.className='arrow-col';arr.innerHTML='<div class="arrow-box"><i class="ti ti-send"></i><span class="arrow-label">'+col.send+'</span></div>';board.appendChild(arr);}
+  });
+}
+
+function renderAliDots(done){
+  curAli=done;
+  var container=document.getElementById('ali-dots-click');container.innerHTML='';
+  for(var i=1;i<=6;i++){
+    var btn=document.createElement('button');
+    btn.className='ali-dot-btn'+(i<=done?' done':'');
+    btn.innerHTML='<span class="ali-dot-num">'+i+'</span><span class="ali-dot-lbl">Ali.</span>';
+    btn.onclick=(function(num){return function(){toggleAli(num);};})(i);
+    container.appendChild(btn);
+  }
+  document.getElementById('dp-ali-val').textContent=done===0?'Ninguno aún':'Alineador '+done+' de 6';
+  document.getElementById('dp-ali-sub').textContent=done===0?'En producción':done===6?'Tratamiento completo ✓':(6-done)+' por entregar';
+}
+
+function toggleAli(num){
+  if(!curPid)return;
+  var newDone=(num===curAli)?num-1:num;
+  if(newDone<0)newDone=0;
+  renderAliDots(newDone);
+  var msg=document.getElementById('ali-save-msg');msg.style.display='none';
+  jsonpGet(API+'?action=update&id='+encodeURIComponent(curPid)+'&ali_entregados='+newDone,function(data){
+    if(data&&data.status==='ok'){
+      msg.style.display='block';setTimeout(function(){msg.style.display='none';},2500);
+      var p=allPatients.find(function(x){return x.id===curPid;});
+      if(p)p.ali_entregados=newDone;
+      renderBoard(allPatients);
+      showToast(newDone===0?'Desmarcado':'Alineador '+newDone+' marcado ✓');
+    } else showToast('Error al guardar',true);
+  });
+}
+
+function selPatient(el,p){
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  curPid=p.id;
+  curNombre=p.nombre;
+  var done=parseInt(p.ali_entregados)||0;
+  var etNum=parseInt(p.etapa_num);
+  document.getElementById('dp-av').textContent=p.iniciales||p.nombre.substring(0,2);
+  document.getElementById('dp-name').textContent=p.nombre;
+  document.getElementById('dp-sub').textContent='Inicio: '+p.inicio+' · Próx. entrega: '+(p.prox_entrega||'—');
+  document.getElementById('dp-etapa').textContent=p.etapa;
+  document.getElementById('dp-owner').textContent='Responsable: '+p.responsable;
+  document.getElementById('dp-start').textContent=p.inicio;
+  document.getElementById('dp-next').textContent=p.prox_entrega||'—';
+  document.getElementById('dp-notas').textContent=p.notas||'—';
+  // Mostrar banner graduado solo en etapa 8
+  document.getElementById('grad-banner').style.display=etNum===8?'flex':'none';
+  var sel=document.getElementById('dp-etapa-sel');
+  for(var i=0;i<sel.options.length;i++){if(sel.options[i].value.split('|')[0]==etNum){sel.selectedIndex=i;break;}}
+  renderAliDots(done);
+  document.getElementById('dp').classList.add('show');
+}
+
+function saveEtapa(){
+  if(!curPid)return;
+  var val=document.getElementById('dp-etapa-sel').value.split('|');
+  var btn=document.getElementById('btn-save-etapa');btn.disabled=true;btn.textContent='Guardando...';
+  var url=API+'?action=update&id='+encodeURIComponent(curPid)+'&etapa_num='+val[0]+'&etapa='+encodeURIComponent(val[1])+'&responsable='+encodeURIComponent(val[2])+'&key='+val[3];
+  jsonpGet(url,function(data){
+    btn.disabled=false;btn.textContent='Guardar etapa';
+    if(data&&data.status==='ok'){
+      var msg=document.getElementById('etapa-msg');msg.style.display='inline';setTimeout(function(){msg.style.display='none';},2500);
+      var p=allPatients.find(function(x){return x.id===curPid;});
+      if(p){p.etapa_num=parseInt(val[0]);p.etapa=val[1];p.responsable=val[2];p.key=val[3];}
+      // Mostrar/ocultar banner según nueva etapa
+      document.getElementById('grad-banner').style.display=parseInt(val[0])===8?'flex':'none';
+      renderBoard(allPatients);updateMetrics(allPatients);
+      showToast('Etapa actualizada');
+    } else showToast('Error al guardar',true);
+  });
+}
+
+function askDelete(){
+  document.getElementById('confirm-msg').textContent='Estás a punto de eliminar a "'+curNombre+'" del sistema. Esta acción no se puede deshacer.';
+  document.getElementById('confirm-modal').classList.add('show');
+}
+
+function closeConfirm(){
+  document.getElementById('confirm-modal').classList.remove('show');
+}
+
+function confirmDelete(){
+  if(!curPid)return;
+  var btn=document.getElementById('btn-confirm-delete');btn.disabled=true;btn.textContent='Eliminando...';
+  jsonpGet(API+'?action=delete&id='+encodeURIComponent(curPid),function(data){
+    btn.disabled=false;btn.textContent='Sí, eliminar';
+    closeConfirm();
+    if(data&&data.status==='ok'){
+      allPatients=allPatients.filter(function(x){return x.id!==curPid;});
+      renderBoard(allPatients);updateMetrics(allPatients);
+      closeDetail();
+      showToast(curNombre+' eliminado correctamente');
+    } else showToast('Error al eliminar',true);
+  });
+}
+
+function saveNewPatient(){
+  var nombre=document.getElementById('f-nombre').value.trim();
+  if(!nombre){showToast('Ingresa el nombre',true);return;}
+  var btn=document.getElementById('btn-save-new');btn.disabled=true;btn.textContent='Guardando...';
+  var etNum=parseInt(document.getElementById('f-etapa').value);
+  var etDef=colDefs.find(function(c){return c.num===etNum;});
+  var keyMap={1:'scan',2:'nemo',3:'print',4:'elab',5:'store'};
+  var newId='p'+Date.now();
+  var ini=document.getElementById('f-iniciales').value.trim()||nombre.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,3).toUpperCase();
+  var url=API+'?action=add&id='+encodeURIComponent(newId)+'&nombre='+encodeURIComponent(nombre)+'&iniciales='+encodeURIComponent(ini)+'&etapa='+encodeURIComponent(etDef.title)+'&etapa_num='+etNum+'&responsable='+encodeURIComponent(etDef.owner)+'&inicio='+document.getElementById('f-inicio').value+'&prox_entrega=&ali_entregados=0&key='+(keyMap[etNum]||'scan')+'&pago_0=0&pago_1=0&pago_2=0&pago_3=0&pago_4=0&pago_5=0&pago_6=0&notas='+encodeURIComponent(document.getElementById('f-notas').value.trim());
+  jsonpGet(url,function(data){
+    btn.disabled=false;btn.textContent='Guardar en Google Sheets';
+    if(data&&data.status==='ok'){
+      closeModal();
+      var newP={id:newId,nombre:nombre,iniciales:ini,etapa:etDef.title,etapa_num:etNum,responsable:etDef.owner,inicio:document.getElementById('f-inicio').value,prox_entrega:'',ali_entregados:0,key:keyMap[etNum]||'scan',notas:document.getElementById('f-notas').value.trim()};
+      allPatients.push(newP);renderBoard(allPatients);updateMetrics(allPatients);
+      showToast('Paciente agregado correctamente');
+    } else showToast('Error al guardar',true);
+  });
+}
+
+function closeDetail(){document.getElementById('dp').classList.remove('show');document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('sel');});curPid=null;curNombre='';}
+function openModal(){document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('confirm-modal').addEventListener('click',function(e){if(e.target===this)closeConfirm();});
+loadData();
+</script>
+</body>
+</html>
